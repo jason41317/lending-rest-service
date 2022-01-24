@@ -6,15 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Product extends Model
+class PurchaseOrder extends Model
 {
     use HasFactory, SoftDeletes;
     
     protected $guarded = ['id'];
-    protected $appends = ['mark_up_percent'];
 
-    public function getMarkUpPercentAttribute()
+    public function products()
     {
-        return number_format(($this->price / $this->cost) - 1, 5);
+        return $this->belongsToMany(Product::class, 'purchase_order_products', 'purchase_order_id', 'product_id')
+            ->withPivot('cost', 'qty');
     }
 }

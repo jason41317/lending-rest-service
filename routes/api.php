@@ -24,5 +24,7 @@ Route::group(['prefix' => 'v1'], function () {
     Route::resource('/categories', 'CategoryController');
     Route::resource('/suppliers', 'SupplierController');
     Route::resource('/units', 'UnitController');
+    Route::resource('/products', 'ProductController');
+    Route::resource('/purchase-orders', 'PurchaseOrderController');
     // }
 });
