@@ -2,22 +2,22 @@
 
 namespace App\Services;
 
-use App\Models\PurchaseOrder;
+use App\Models\Adjustment;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class PurchaseOrderService
+class AdjustmentService
 {
   public function list(bool $isPaginated, int $perPage)
   {
     try {
-      $purchaseOrders = $isPaginated
-        ? PurchaseOrder::paginate($perPage)
-        : PurchaseOrder::all();
-      return $purchaseOrders;
+      $adjustments = $isPaginated
+        ? Adjustment::paginate($perPage)
+        : Adjustment::all();
+      return $adjustments;
     } catch (Exception $e) {
-      Log::info('Error occured during PurchaseOrderService list method call: ');
+      Log::info('Error occured during AdjustmentService list method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -27,21 +27,23 @@ class PurchaseOrderService
   {
     DB::beginTransaction();
     try {
-      $purchaseOrder = PurchaseOrder::create($data);
+      $adjustment = Adjustment::create($data);
       $items = [];
+      $type = $adjustment->adjustment_type_id === 1 ? 'IN' : 'OUT';
       foreach ($products as $product) {
         $items[$product['id']] = [
           'cost' => $product['cost'],
-          'quantity' => $product['quantity']
+          'quantity' => $product['quantity'],
+          'type' => $type
         ];
       }
 
-      $purchaseOrder->products()->sync($items);
+      $adjustment->products()->sync($items);
       DB::commit();
-      return $purchaseOrder;
+      return $adjustment;
     } catch (Exception $e) {
       DB::rollback();
-      Log::info('Error occured during PurchaseOrderService store method call: ');
+      Log::info('Error occured during AdjustmentService store method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -50,11 +52,11 @@ class PurchaseOrderService
   public function get(int $id)
   {
     try {
-      $purchaseOrder = PurchaseOrder::find($id);
-      $purchaseOrder->load('products');
-      return $purchaseOrder;
+      $adjustment = Adjustment::find($id);
+      $adjustment->load('products');
+      return $adjustment;
     } catch (Exception $e) {
-      Log::info('Error occured during PurchaseOrderService get method call: ');
+      Log::info('Error occured during AdjustmentService get method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -64,24 +66,26 @@ class PurchaseOrderService
   {
     DB::beginTransaction();
     try {
-      $purchaseOrder = PurchaseOrder::find($id);
-      $purchaseOrder->update($data);
+      $adjustment = Adjustment::find($id);
+      $adjustment->update($data);
 
       $items = [];
+      $type = $adjustment->adjustment_type_id === 1 ? 'IN' : 'OUT';
       foreach ($products as $product) {
         $items[$product['id']] = [
           'cost' => $product['cost'],
-          'quantity' => $product['quantity']
+          'quantity' => $product['quantity'],
+          'type' => $type
         ];
       }
 
-      $purchaseOrder->products()->sync($items);
+      $adjustment->products()->sync($items);
 
       DB::commit();
-      return $purchaseOrder;
+      return $adjustment;
     } catch (Exception $e) {
       DB::rollback();
-      Log::info('Error occured during PurchaseOrderService update method call: ');
+      Log::info('Error occured during AdjustmentService update method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -91,12 +95,12 @@ class PurchaseOrderService
   {
     DB::beginTransaction();
     try {
-      $purchaseOrder = PurchaseOrder::find($id);
-      $purchaseOrder->delete();
+      $adjustment = Adjustment::find($id);
+      $adjustment->delete();
       DB::commit();
     } catch (Exception $e) {
       DB::rollback();
-      Log::info('Error occured during PurchaseOrderService delete method call: ');
+      Log::info('Error occured during AdjustmentService delete method call: ');
       Log::info($e->getMessage());
       throw $e;
     }

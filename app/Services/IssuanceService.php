@@ -2,22 +2,22 @@
 
 namespace App\Services;
 
-use App\Models\PurchaseOrder;
+use App\Models\Issuance;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class PurchaseOrderService
+class IssuanceService
 {
   public function list(bool $isPaginated, int $perPage)
   {
     try {
-      $purchaseOrders = $isPaginated
-        ? PurchaseOrder::paginate($perPage)
-        : PurchaseOrder::all();
-      return $purchaseOrders;
+      $issuances = $isPaginated
+        ? Issuance::paginate($perPage)
+        : Issuance::all();
+      return $issuances;
     } catch (Exception $e) {
-      Log::info('Error occured during PurchaseOrderService list method call: ');
+      Log::info('Error occured during IssuanceService list method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -27,21 +27,22 @@ class PurchaseOrderService
   {
     DB::beginTransaction();
     try {
-      $purchaseOrder = PurchaseOrder::create($data);
+      $issuance = Issuance::create($data);
       $items = [];
       foreach ($products as $product) {
         $items[$product['id']] = [
           'cost' => $product['cost'],
-          'quantity' => $product['quantity']
+          'quantity' => $product['quantity'],
+          'type' => 'OUT'
         ];
       }
 
-      $purchaseOrder->products()->sync($items);
+      $issuance->products()->sync($items);
       DB::commit();
-      return $purchaseOrder;
+      return $issuance;
     } catch (Exception $e) {
       DB::rollback();
-      Log::info('Error occured during PurchaseOrderService store method call: ');
+      Log::info('Error occured during IssuanceService store method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -50,11 +51,11 @@ class PurchaseOrderService
   public function get(int $id)
   {
     try {
-      $purchaseOrder = PurchaseOrder::find($id);
-      $purchaseOrder->load('products');
-      return $purchaseOrder;
+      $issuance = Issuance::find($id);
+      $issuance->load('products');
+      return $issuance;
     } catch (Exception $e) {
-      Log::info('Error occured during PurchaseOrderService get method call: ');
+      Log::info('Error occured during IssuanceService get method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -64,24 +65,25 @@ class PurchaseOrderService
   {
     DB::beginTransaction();
     try {
-      $purchaseOrder = PurchaseOrder::find($id);
-      $purchaseOrder->update($data);
+      $issuance = Issuance::find($id);
+      $issuance->update($data);
 
       $items = [];
       foreach ($products as $product) {
         $items[$product['id']] = [
           'cost' => $product['cost'],
-          'quantity' => $product['quantity']
+          'quantity' => $product['quantity'],
+          'type' => 'OUT'
         ];
       }
 
-      $purchaseOrder->products()->sync($items);
+      $issuance->products()->sync($items);
 
       DB::commit();
-      return $purchaseOrder;
+      return $issuance;
     } catch (Exception $e) {
       DB::rollback();
-      Log::info('Error occured during PurchaseOrderService update method call: ');
+      Log::info('Error occured during IssuanceService update method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -91,12 +93,12 @@ class PurchaseOrderService
   {
     DB::beginTransaction();
     try {
-      $purchaseOrder = PurchaseOrder::find($id);
-      $purchaseOrder->delete();
+      $issuance = Issuance::find($id);
+      $issuance->delete();
       DB::commit();
     } catch (Exception $e) {
       DB::rollback();
-      Log::info('Error occured during PurchaseOrderService delete method call: ');
+      Log::info('Error occured during IssuanceService delete method call: ');
       Log::info($e->getMessage());
       throw $e;
     }

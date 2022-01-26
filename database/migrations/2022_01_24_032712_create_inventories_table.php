@@ -22,6 +22,7 @@ class CreateInventoriesTable extends Migration
             $table->date('expiration_date')->nullable();
             $table->decimal('cost', 19, 5)->default(0)->nullable();
             $table->decimal('quantity', 19, 5)->default(0)->nullable();
+            $table->string('type')->default('')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -34,6 +35,6 @@ class CreateInventoriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('invetories');
+        Schema::dropIfExists('inventories');
     }
 }

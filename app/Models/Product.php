@@ -17,4 +17,15 @@ class Product extends Model
     {
         return number_format(($this->price / $this->cost) - 1, 5);
     }
+
+    public function inventories()
+    {
+        return $this->hasMany(Inventory::class);
+    }
+
+    public function getInventoryCountAttribute()
+    {
+        $inventories = $this->inventories;
+        return $inventories->where('type', 'IN')->count() - $inventories->where('type', 'OUT')->count();
+    }
 }

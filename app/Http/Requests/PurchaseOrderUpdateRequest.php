@@ -11,20 +11,18 @@ class PurchaseOrderUpdateRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
-    {
-        return false;
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
     public function rules()
     {
         return [
-            //
+            'supplier_id' => 'required|not_in:0',
+            'datetime' => 'required|date'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'not_in' => 'The :attribute field is required.'
         ];
     }
 }

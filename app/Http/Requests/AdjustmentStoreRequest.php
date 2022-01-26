@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class PurchaseOrderStoreRequest extends FormRequest
+class AdjustmentStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +24,7 @@ class PurchaseOrderStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'supplier_id' => 'required|not_in:0',
+            'adjustment_type_id' => 'required|not_in:0',
             'datetime' => 'required|date'
         ];
     }

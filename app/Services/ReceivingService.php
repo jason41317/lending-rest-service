@@ -2,22 +2,22 @@
 
 namespace App\Services;
 
-use App\Models\PurchaseOrder;
+use App\Models\Receiving;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class PurchaseOrderService
+class ReceivingService
 {
   public function list(bool $isPaginated, int $perPage)
   {
     try {
-      $purchaseOrders = $isPaginated
-        ? PurchaseOrder::paginate($perPage)
-        : PurchaseOrder::all();
-      return $purchaseOrders;
+      $receivings = $isPaginated
+        ? Receiving::paginate($perPage)
+        : Receiving::all();
+      return $receivings;
     } catch (Exception $e) {
-      Log::info('Error occured during PurchaseOrderService list method call: ');
+      Log::info('Error occured during ReceivingService list method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -27,21 +27,22 @@ class PurchaseOrderService
   {
     DB::beginTransaction();
     try {
-      $purchaseOrder = PurchaseOrder::create($data);
+      $receiving = Receiving::create($data);
       $items = [];
       foreach ($products as $product) {
         $items[$product['id']] = [
           'cost' => $product['cost'],
-          'quantity' => $product['quantity']
+          'quantity' => $product['quantity'],
+          'type' => 'IN'
         ];
       }
 
-      $purchaseOrder->products()->sync($items);
+      $receiving->products()->sync($items);
       DB::commit();
-      return $purchaseOrder;
+      return $receiving;
     } catch (Exception $e) {
       DB::rollback();
-      Log::info('Error occured during PurchaseOrderService store method call: ');
+      Log::info('Error occured during ReceivingService store method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -50,11 +51,11 @@ class PurchaseOrderService
   public function get(int $id)
   {
     try {
-      $purchaseOrder = PurchaseOrder::find($id);
-      $purchaseOrder->load('products');
-      return $purchaseOrder;
+      $receiving = Receiving::find($id);
+      $receiving->load('products');
+      return $receiving;
     } catch (Exception $e) {
-      Log::info('Error occured during PurchaseOrderService get method call: ');
+      Log::info('Error occured during ReceivingService get method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -64,24 +65,25 @@ class PurchaseOrderService
   {
     DB::beginTransaction();
     try {
-      $purchaseOrder = PurchaseOrder::find($id);
-      $purchaseOrder->update($data);
+      $receiving = Receiving::find($id);
+      $receiving->update($data);
 
       $items = [];
       foreach ($products as $product) {
         $items[$product['id']] = [
           'cost' => $product['cost'],
-          'quantity' => $product['quantity']
+          'quantity' => $product['quantity'],
+          'type' => 'IN'
         ];
       }
 
-      $purchaseOrder->products()->sync($items);
+      $receiving->products()->sync($items);
 
       DB::commit();
-      return $purchaseOrder;
+      return $receiving;
     } catch (Exception $e) {
       DB::rollback();
-      Log::info('Error occured during PurchaseOrderService update method call: ');
+      Log::info('Error occured during ReceivingService update method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -91,12 +93,12 @@ class PurchaseOrderService
   {
     DB::beginTransaction();
     try {
-      $purchaseOrder = PurchaseOrder::find($id);
-      $purchaseOrder->delete();
+      $receiving = Receiving::find($id);
+      $receiving->delete();
       DB::commit();
     } catch (Exception $e) {
       DB::rollback();
-      Log::info('Error occured during PurchaseOrderService delete method call: ');
+      Log::info('Error occured during ReceivingService delete method call: ');
       Log::info($e->getMessage());
       throw $e;
     }

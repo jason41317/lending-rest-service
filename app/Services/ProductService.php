@@ -15,6 +15,8 @@ class ProductService
       $products = $isPaginated
         ? Product::paginate($perPage)
         : Product::all();
+      $products->load('inventories');
+      $products->append('inventory_count');
       return $products;
     } catch (Exception $e) {
       Log::info('Error occured during ProductService list method call: ');
